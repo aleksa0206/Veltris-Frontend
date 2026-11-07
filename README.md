@@ -2,36 +2,38 @@
 
 # Veltris — Frontend
 
-Angular client for Veltris, a project management tool for teams: workspaces with members, projects with a short key, task boards with drag and drop, task details with subtasks, comments and a full change history — in a light and a dark theme.
+Angular client for Veltris, a project management tool for teams: workspaces with members, projects with a short key, task boards with drag and drop, and task details with subtasks, comments and a full change history.
 
 - Backend: [Veltris-Backend](https://github.com/aleksa0206/Veltris-Backend)
 
-## Screens
+## What's inside
 
-- **Workspace overview** — key numbers (open, overdue, due in the next 7 days, completed this week) as one strip, your open tasks grouped by urgency, projects in progress with their progress, and recent activity across the workspace.
-- **Projects** — a data table with status, lead, progress, open and overdue counts and target date; filter by status, search by name or key, sort, paginate. Create and edit projects in a modal; the key is suggested from the name.
-- **Board** — one column per status, cards with identifier, priority, due date, subtask progress, comments and assignee. Drag and drop between and within columns (saved as a single request), quick add per column, filters by text, assignee and priority (kept in the URL). Clicking a card opens it in a side panel.
-- **Task details** — title and description edited in place, a property rail (status, priority, assignee, due date, project, reporter, dates), subtasks with one-click completion, and a timeline that merges comments with the change history.
-- **Members** — everyone in the workspace with their role; owners and admins change roles, remove members and invite people by email (an existing account joins at once, anyone else gets a 7-day link), with a list of pending invitations to revoke. Anyone but the owner can leave.
-- **Invitation link** (`/invite`) — shows who invited you where; join with one click when signed in with the invited address, sign in, or create an account that joins that workspace directly.
-- **Command palette** (`Ctrl/⌘ K`) — jump to any task by title or identifier (`WEB-12`), any project or page, create a project, switch theme, sign out.
-- Sign-in with optional two-factor authentication, sign-up (creates your first workspace), password reset, account page; several workspaces with a switcher.
+- **Overview** — open tasks, overdue, due in the next seven days and completed this week; your tasks grouped by urgency, projects in progress with their progress and recent activity across the workspace.
+- **Projects** — a table with status, lead, progress, open and overdue tasks and target date; filter by status, search by name or key, sort. The project key is suggested from the name.
+- **Board** — one column per status; drag cards between and within columns, add a task right in a column, filter by text, assignee and priority. Clicking a card opens it in a side panel.
+- **Task details** — title and description edited in place, status, priority, assignee and due date, subtasks with one-click completion, and comments mixed with the change history.
+- **Members** — roles, removing members, leaving a workspace, invitations by email and pending invitations.
+- **Command palette** (`Ctrl/⌘ K`) — jump to any task by title or ID (`WEB-12`), to a project or page, create a project, switch the theme.
+- **Account** — personal details and two-factor authentication; several workspaces with a switcher.
 
-## Design system — "Quiet Precision"
+## Design
 
-Built for enterprise project work: dense, calm and exact rather than decorative.
+The interface is meant to feel precise and quiet, for people who spend the whole day in it:
 
-- **Tokens** (`src/styles/_tokens.scss`): semantic colour roles (canvas, surface, raised, sunken; text levels; primary, accent, states; status and priority hues), type scale with a 13px working size, 4px spacing scale, hairline borders, radii up to 8px, theme-specific elevation, motion durations and easings, z-index layers and component states. Components never use raw values.
-- **Two themes, designed separately.** Light uses neutral greys, an ink primary action and a cobalt accent. Dark is not an inversion: surfaces lighten as they come forward, borders carry the separation, accent and status hues are lifted and desaturated, the primary action inverts to light ink, and shadows only frame overlays. The theme follows the system until the user picks one, and is applied before the first paint.
-- **Meaning before colour.** Status icons differ in shape (dashed, empty, half, three-quarter, filled check, filled cross) and priority in bar count, so they work in greyscale and for colour-blind users; overdue dates are red and say "3d overdue".
-- **Typography**: Geist for the interface, Geist Mono for identifiers and figures.
-- **Components** (`src/app/shared/ui`, `src/app/layout`): sidebar with workspace switcher, header with breadcrumbs, buttons, inputs, select menus (`app-picker` and the task pickers), dropdown menus, data table, task rows, board cards, status and priority indicators, modals, side panel, tooltips, notifications, command palette.
+- neutral greys, white working surfaces, an ink-coloured primary button and one cobalt accent for focus, selection and progress;
+- a light and a dark theme, each designed on its own — in the dark one surfaces get lighter as they come forward and the accent and status colours are lifted, instead of simply inverting the light theme; it follows the system until you choose;
+- dense lists and tables with a 13px working size, Geist for the interface and Geist Mono for task IDs and numbers;
+- thin borders instead of cards and shadows, small radii, short functional transitions;
+- status and priority are told apart by shape, not only by colour;
+- on phones (< 900 px) the sidebar becomes a drawer.
+
+All values live in `src/styles/_tokens.scss` (colour roles for both themes, type scale, spacing, borders, radii, shadows, motion, layers and component states); components use only those tokens.
 
 ## Tech stack
 
-Angular 22 (standalone components, signals, `rxResource`, `linkedSignal`) · Angular CDK (menus, dialogs, overlays, drag and drop, focus trap) · SCSS design tokens · Vitest · nginx · Docker
+Angular 22 (standalone components, signals, `rxResource`) · Angular CDK (menus, dialogs, overlays, drag and drop) · SCSS design tokens · Vitest · nginx · Docker
 
-No UI component library and no state library: list and board state live in the URL, server state in resources that reload by topic.
+No UI component library and no state library: the look is built from the design tokens, and list and board filters live in the URL.
 
 ## Running locally
 
@@ -50,20 +52,19 @@ Set `FRONTEND_URL=http://localhost:4200` in the backend `.env`. Run `npm run see
 src/app/
   core/       API contracts and one service per resource, error normalization, auth (session,
               interceptor, guards), change notifications, current workspace, theme
-  shared/     UI components (pickers, indicators, header, side panel, task row, dialogs, toast,
-              tooltip, icons), utilities (dates, task texts, formatting), editors
-  layout/     app shell (sidebar, drawer on small screens), command palette, auth layout
-  features/   overview, projects, board, tasks (detail, timeline, dialog), members, workspace,
-              account, auth (incl. the invitation page)
+  shared/     UI components (pickers, status and priority indicators, header, side panel, task
+              row, dialogs, toast, tooltip, icons), utilities (dates, task texts, formatting)
+  layout/     app shell (sidebar, drawer on phones), command palette, auth layout, 403/404
+  features/   overview, projects, board, tasks, members, workspace, account, auth
 src/styles/   tokens → CSS variables (light and dark), mixins, reset, base primitives
 ```
 
 ## Notable decisions
 
 - **Access token in memory only.** The session is restored through the httpOnly refresh cookie; parallel 401 responses share a single refresh because the backend rotates the refresh token.
-- **Optimistic, but honest.** Board moves and property edits update the screen immediately, then reload from the server; a failed save rolls back and says why.
-- **One task view, two places.** The board's side panel and the task page render the same component, so a field never behaves differently depending on where it was opened.
-- **Reload by topic.** After a write, `Changes.notify('tasks' | 'projects' | 'workspace')` bumps a counter the affected resources depend on.
+- **Changes show at once.** Moving a card or editing a property updates the screen immediately and then reloads from the server; a failed save is rolled back with a message.
+- **One task view.** The board's side panel and the task page use the same component, so a field behaves the same wherever it is opened.
+- **Reload by topic.** After a write, `Changes.notify('tasks' | 'projects' | 'workspace')` bumps a counter the affected screens depend on.
 - **The user's today is sent to the API**, so "overdue" and "due this week" match the user's calendar day.
 - Dialogs are loaded lazily, which keeps the initial bundle under 500 kB.
 
