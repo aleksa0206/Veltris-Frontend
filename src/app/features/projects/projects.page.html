@@ -1,0 +1,164 @@
+<div class="page">
+  <app-header [crumbs]="crumbs()">
+    <button type="button" class="btn btn--primary" (click)="editors.project()">
+      <app-icon name="plus" /> New project
+    </button>
+  </app-header>
+
+  <div class="page__body">
+    <div class="toolbar list-toolbar">
+      <div class="segmented" role="group" aria-label="Show projects">
+        @for (v of views; track v) {
+          <button
+            type="button"
+            [attr.aria-pressed]="activeView() === v"
+            (click)="update({ view: v === 'current' ? null : v })"
+          >
+            {{ viewLabels[v] }}
+          </button>
+        }
+      </div>
+      <span class="toolbar__spacer"></span>
+      <app-search-input
+        label="Search by name or key"
+        [value]="search() ?? ''"
+        (search)="update({ search: $event || null })"
+      />
+      <label class="visually-hidden" for="project-sort">Sort by</label>
+      <select
+        id="project-sort"
+        class="select"
+        [value]="activeSort()"
+        (change)="update({ sort: $any($event.target).value }, false)"
+      >
+        <option value="name">Name</option>
+        <option value="targetDate">Target date</option>
+        <option value="updated">Recently updated</option>
+      </select>
+    </div>
+
+    @if (projects.error(); as error) {
+      <div class="panel"><app-load-error [error]="error" (retry)="projects.reload()" /></div>
+    } @else if (projects.value()?.data?.length === 0) {
+      <div class="panel">
+        @if (search() || activeView() !== 'current') {
+          <app-empty-state
+            icon="search"
+            title="No projects match"
+            description="Try another name or a different status."
+          />
+        } @else {
+          <app-empty-state
+            icon="folder"
+            title="No projects yet"
+            description="A project groups tasks under a short key, such as WEB-12."
+          >
+            <button type="button" class="btn" (click)="editors.project()">Create project</button>
+          </app-empty-state>
+        }
+      </div>
+    } @else {
+      <div class="panel table-wrap" [attr.aria-busy]="projects.isLoading()">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Project</th>
+              <th scope="col">Status</th>
+              <th scope="col">Lead</th>
+              <th scope="col">Progress</th>
+              <th scope="col" class="table__num">Open</th>
+              <th scope="col" class="table__num">Overdue</th>
+              <th scope="col">Target</th>
+              <th scope="col"><span class="visually-hidden">Actions</span></th>
+            </tr>
+          </thead>
+          @if (projects.value(); as page) {
+            <tbody>
+              @for (project of page.data; track project.id) {
+                <tr class="project-row" (click)="open(project, $event)">
+                  <td>
+                    <span class="cell-project">
+                      <span class="mono project-key">{{ project.key }}</span>
+                      <a [routerLink]="['/projects', project.id]">{{ project.name }}</a>
+                    </span>
+                  </td>
+                  <td>
+                    <span [class]="statusClass(project.status)">{{
+                      statusLabels[project.status]
+                    }}</span>
+                  </td>
+                  <td>
+                    @if (project.lead; as lead) {
+                      <span class="cell-person">
+                        <app-avatar [person]="lead" [size]="20" />
+                        {{ lead | fullName }}
+                      </span>
+                    } @else {
+                      <span class="text-tertiary">—</span>
+                    }
+                  </td>
+                  <td>
+                    <span class="cell-progress">
+                      <span class="progress" aria-hidden="true">
+                        <span
+                          [style.width.%]="percent(project.tasks.done, project.tasks.total)"
+                        ></span>
+                      </span>
+                      <span class="tabular">
+                        {{ project.tasks.done }}/{{ project.tasks.total }}
+                      </span>
+                    </span>
+                  </td>
+                  <td class="table__num">{{ project.tasks.open }}</td>
+                  <td class="table__num" [class.text-danger]="project.tasks.overdue > 0">
+                    {{ project.tasks.overdue || '—' }}
+                  </td>
+                  <td [class.text-danger]="isLate(project)">
+                    @if (project.targetDate) {
+                      {{ project.targetDate | calendarDate }}
+                    } @else {
+                      <span class="text-tertiary">—</span>
+                    }
+                  </td>
+                  <td class="cell-actions">
+                    <button
+                      type="button"
+                      class="btn btn--ghost btn--icon btn--sm"
+                      [attr.aria-label]="'Actions for ' + project.name"
+                      [cdkMenuTriggerFor]="rowMenu"
+                      [cdkMenuTriggerData]="{ $implicit: project }"
+                    >
+                      <app-icon name="more" />
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          } @else {
+            <tbody appSkeletonRows [columns]="8" [rows]="6"></tbody>
+          }
+        </table>
+      </div>
+      <app-pagination
+        [meta]="projects.value()?.meta"
+        (pageChange)="update({ page: $event }, false)"
+      />
+    }
+  </div>
+</div>
+
+<ng-template #rowMenu let-project>
+  <div class="menu" cdkMenu>
+    <a class="menu__item" cdkMenuItem [routerLink]="['/projects', project.id]">
+      <app-icon name="board" /> Open board
+    </a>
+    <button
+      type="button"
+      class="menu__item"
+      cdkMenuItem
+      (cdkMenuItemTriggered)="editors.project(project)"
+    >
+      <app-icon name="pencil" /> Edit project
+    </button>
+  </div>
+</ng-template>

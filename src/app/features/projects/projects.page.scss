@@ -1,0 +1,96 @@
+@use 'mixins' as *;
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.list-toolbar {
+  margin-bottom: var(--space-4);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.project-row {
+  cursor: pointer;
+}
+
+.cell-project {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 260px;
+  a {
+    @include truncate;
+    color: var(--color-text);
+    font-weight: var(--font-weight-medium);
+  }
+}
+.project-key {
+  flex-shrink: 0;
+  width: 44px;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-meta);
+}
+
+.cell-person {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.cell-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-meta);
+}
+
+.cell-actions {
+  width: 44px;
+  text-align: right;
+}
+
+// Project status: a small square plus the label. On hold is the one state that asks for
+// attention; completed and archived step back.
+.project-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  white-space: nowrap;
+  &::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    background: currentColor;
+  }
+}
+.project-status--active {
+  color: var(--color-text);
+  &::before {
+    background: var(--color-accent);
+  }
+}
+.project-status--onhold {
+  color: var(--color-warning);
+}
+.project-status--completed {
+  color: var(--color-text-secondary);
+  &::before {
+    background: var(--color-success);
+  }
+}
+.project-status--archived {
+  color: var(--color-text-tertiary);
+}
+
+app-pagination {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--font-size-meta);
+}
