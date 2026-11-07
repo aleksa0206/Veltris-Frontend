@@ -1,0 +1,601 @@
+// Global primitives. Everything here is built from tokens; components add their own layout only.
+@use 'mixins' as *;
+
+// ---------------------------------------------------------------- Document
+html {
+  background: var(--color-canvas);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: var(--font-weight-semibold);
+}
+
+a {
+  color: var(--color-accent-text);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+::selection {
+  background: var(--color-accent-subtle);
+}
+
+:focus-visible {
+  @include focus-ring;
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+
+.visually-hidden {
+  @include visually-hidden;
+}
+
+.skip-link {
+  position: fixed;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: var(--z-toast);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  transform: translateY(-200%);
+}
+.skip-link:focus {
+  transform: none;
+}
+
+// ---------------------------------------------------------------- Text helpers
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+.text-tertiary,
+.text-meta {
+  color: var(--color-text-tertiary);
+}
+.text-meta {
+  font-size: var(--font-size-meta);
+  line-height: var(--line-height-meta);
+}
+.text-danger {
+  color: var(--color-danger);
+}
+// Task identifiers (WEB-12) and other machine-ish values.
+.mono {
+  font-family: var(--font-family-mono);
+  font-size: 0.923em;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: var(--border);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-tertiary);
+  font-family: var(--font-family);
+  font-size: var(--font-size-micro);
+  line-height: 1;
+}
+
+// ---------------------------------------------------------------- Buttons
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1-5);
+  height: var(--control-height);
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-colors);
+
+  &:hover {
+    background: var(--color-surface-subtle);
+    border-color: var(--color-border-strong);
+    text-decoration: none;
+  }
+  &:active {
+    background: var(--color-surface-sunken);
+  }
+  &:disabled,
+  &[aria-disabled='true'] {
+    opacity: var(--opacity-disabled);
+    pointer-events: none;
+  }
+  > .icon {
+    color: var(--color-text-secondary);
+  }
+}
+
+.btn--primary {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  &:hover {
+    border-color: var(--color-primary-hover);
+    background: var(--color-primary-hover);
+  }
+  &:active {
+    background: var(--color-primary);
+  }
+  > .icon {
+    color: inherit;
+  }
+}
+
+.btn--danger {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+  color: #fff;
+  &:hover {
+    border-color: var(--color-danger-hover);
+    background: var(--color-danger-hover);
+  }
+}
+
+.btn--ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-text-secondary);
+  box-shadow: none;
+  &:hover {
+    border-color: transparent;
+    background: var(--color-state-hover);
+    color: var(--color-text);
+  }
+  &:active {
+    background: var(--color-state-pressed);
+  }
+}
+
+.btn--sm {
+  height: var(--control-height-sm);
+  padding: 0 var(--space-2);
+  font-size: var(--font-size-meta);
+}
+
+.btn--icon {
+  width: var(--control-height);
+  padding: 0;
+  &.btn--sm {
+    width: var(--control-height-sm);
+  }
+}
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: var(--radius-full);
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ---------------------------------------------------------------- Inputs
+.input,
+.select {
+  width: 100%;
+  height: var(--control-height);
+  padding: 0 var(--space-2-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  transition: var(--transition-colors);
+
+  &::placeholder {
+    color: var(--color-text-tertiary);
+  }
+  &:hover {
+    border-color: var(--color-border-strong);
+  }
+  &:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-subtle);
+  }
+  &[aria-invalid='true'] {
+    border-color: var(--color-danger);
+  }
+  &:disabled {
+    opacity: var(--opacity-disabled);
+  }
+}
+
+textarea.input {
+  height: auto;
+  min-height: 88px;
+  padding: var(--space-2) var(--space-2-5);
+  line-height: var(--line-height-body);
+  resize: vertical;
+}
+
+.select {
+  width: auto;
+  padding-right: 28px;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--color-text-tertiary) 50%),
+    linear-gradient(135deg, var(--color-text-tertiary) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 10px) 50%;
+  background-size:
+    4px 4px,
+    4px 4px;
+  background-repeat: no-repeat;
+}
+
+input[type='date'].input {
+  font-variant-numeric: tabular-nums;
+}
+[data-theme='dark'] input[type='date'].input::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+}
+
+// ---------------------------------------------------------------- Forms
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+.form__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+.form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+.form-error {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
+}
+
+// ---------------------------------------------------------------- Dropdown menus (CDK menu)
+.menu {
+  display: grid;
+  min-width: 200px;
+  max-height: min(420px, 70vh);
+  overflow-y: auto;
+  padding: var(--space-1);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-overlay);
+  animation: overlay-in var(--duration-fast) var(--ease-standard);
+}
+
+.menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 30px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  text-align: left;
+  @include interactive-row;
+
+  &:hover,
+  &:focus {
+    outline: none;
+    text-decoration: none;
+  }
+  &:focus-visible,
+  &.cdk-menu-item-focused,
+  &.is-active {
+    background: var(--color-state-hover);
+  }
+  > .icon {
+    color: var(--color-text-tertiary);
+  }
+  .menu__check {
+    margin-left: auto;
+    color: var(--color-accent);
+  }
+}
+
+.menu__item--danger {
+  color: var(--color-danger);
+  > .icon {
+    color: inherit;
+  }
+}
+
+.menu__label {
+  padding: var(--space-2) var(--space-2) var(--space-1);
+  @include text('meta');
+}
+
+.menu__separator {
+  height: 1px;
+  margin: var(--space-1) calc(-1 * var(--space-1));
+  background: var(--color-border-subtle);
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+}
+
+// ---------------------------------------------------------------- Modals (CDK dialog)
+.cdk-overlay-container {
+  z-index: var(--z-overlay);
+}
+.cdk-overlay-dark-backdrop {
+  background: var(--color-backdrop);
+}
+
+.dialog {
+  display: grid;
+  overflow: hidden;
+  max-height: calc(100vh - 64px);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-overlay);
+  animation: dialog-in var(--duration-base) var(--ease-standard);
+}
+.dialog__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5) 0;
+}
+.dialog__title {
+  @include text('heading-sm');
+}
+.dialog__body {
+  padding: var(--space-4) var(--space-5);
+  overflow-y: auto;
+}
+.dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-top: var(--border-subtle);
+  background: var(--color-surface-subtle);
+}
+// The confirm dialog puts everything straight into .dialog.
+app-confirm-dialog {
+  padding-top: var(--space-4);
+  .dialog__title {
+    padding: 0 var(--space-5);
+  }
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.99);
+  }
+}
+
+// ---------------------------------------------------------------- Tooltip
+.tooltip {
+  max-width: 260px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  font-size: var(--font-size-meta);
+  line-height: var(--line-height-meta);
+  pointer-events: none;
+}
+
+// ---------------------------------------------------------------- Data table
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-variant-numeric: tabular-nums;
+
+  th {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-raised);
+    height: 32px;
+    padding: 0 var(--space-3);
+    border-bottom: var(--border);
+    background: var(--color-surface-subtle);
+    text-align: left;
+    white-space: nowrap;
+    @include text('label');
+    color: var(--color-text-tertiary);
+  }
+  td {
+    height: 44px;
+    padding: 0 var(--space-3);
+    border-bottom: var(--border-subtle);
+    vertical-align: middle;
+  }
+  tbody tr {
+    @include interactive-row;
+  }
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+  .table__num {
+    text-align: right;
+  }
+}
+
+// ---------------------------------------------------------------- Page scaffolding
+// Each screen is header + scrolling body; the layout inside the body is the screen's own.
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+.page__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-6) var(--space-8) var(--space-12);
+  @include down('md') {
+    padding: var(--space-4);
+  }
+}
+.page--narrow .page__body > * {
+  max-width: 640px;
+}
+
+.section + .section {
+  margin-top: var(--space-8);
+}
+.section__heading {
+  margin-bottom: var(--space-3);
+  @include text('heading-sm');
+}
+
+// Bordered container for lists and tables; flat, no shadow.
+.panel {
+  overflow: hidden;
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+// ---------------------------------------------------------------- Small pieces
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 20px;
+  padding: 0 var(--space-1-5);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+.badge--success {
+  border-color: transparent;
+  background: var(--color-success-subtle);
+  color: var(--color-success);
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+
+  button {
+    height: calc(var(--control-height) - 4px);
+    padding: 0 var(--space-2-5);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-medium);
+    transition: var(--transition-colors);
+    &:hover {
+      color: var(--color-text);
+    }
+    &[aria-pressed='true'] {
+      background: var(--color-surface);
+      color: var(--color-text);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+}
+[data-theme='dark'] .segmented button[aria-pressed='true'] {
+  background: var(--color-surface-raised);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.toolbar__spacer {
+  flex: 1;
+}
+
+.skeleton {
+  display: block;
+  height: 10px;
+  border-radius: var(--radius-xs);
+  background: var(--color-skeleton);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+// Inline progress bar: a fraction of work done, always shown next to its numbers.
+.progress {
+  position: relative;
+  overflow: hidden;
+  width: 72px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-sunken);
+  span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: inherit;
+    background: var(--color-accent);
+  }
+}

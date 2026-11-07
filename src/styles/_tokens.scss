@@ -1,0 +1,294 @@
+// Veltris design tokens — "Quiet Precision".
+//
+// Single source of design values. Components only ever use the semantic CSS custom properties
+// emitted here (`--color-text`, `--space-3`, ...), never raw values, so both themes and future
+// adjustments happen in this file alone.
+//
+// Direction: neutral greys, one cobalt accent for focus, selection and progress, ink-coloured
+// primary actions. Colour carries meaning (status, priority, danger), is always paired with a
+// label or an icon shape, and never decorates.
+//
+// Dark is designed on its own, not inverted: surfaces get lighter as they come closer
+// (canvas < surface < raised), borders do most of the separation, the accent and the status hues
+// are lifted and slightly desaturated so they keep contrast without glowing, and shadows are
+// deeper because they only show against the canvas.
+
+// ---------------------------------------------------------------------------------------------
+// Colour — semantic roles per theme
+// ---------------------------------------------------------------------------------------------
+
+$light: (
+  // Surfaces, from back to front
+  'canvas': #f6f6f7,
+  'surface': #ffffff,
+  'surface-raised': #ffffff,
+  'surface-subtle': #fafafa,
+  'surface-sunken': #f0f0f2,
+  'sidebar': #f6f6f7,
+
+  // Lines
+  'border': #e4e4e8,
+  'border-subtle': #eeeef1,
+  'border-strong': #cfcfd5,
+
+  // Text
+  'text': #17171a,
+  'text-secondary': #55555d,
+  'text-tertiary': #8b8b94,
+  'text-disabled': #b6b6bd,
+  'text-inverse': #ffffff,
+
+  // Primary action: ink
+  'primary': #1c1c20,
+  'primary-hover': #33333a,
+  'primary-text': #ffffff,
+
+  // Accent: focus, selection, links, progress
+  'accent': #3a4bd0,
+  'accent-hover': #3140b4,
+  'accent-subtle': #eef0fc,
+  'accent-text': #3443c0,
+
+  // Interaction states, layered over any surface
+  'state-hover': rgba(23, 23, 26, 0.045),
+  'state-pressed': rgba(23, 23, 26, 0.08),
+  'state-selected': #eef0fc,
+  'focus-ring': rgba(58, 75, 208, 0.4),
+  // Feedback
+  'success': #1c7a50,
+  'success-subtle': #e7f3ec,
+  'warning': #9d5c06,
+  'warning-subtle': #fbf1e1,
+  'danger': #c43a31,
+  'danger-hover': #a82f27,
+  'danger-subtle': #fcecea,
+
+  // Task status
+  'status-backlog': #a0a0a8,
+  'status-todo': #6c6c75,
+  'status-in-progress': #c4870a,
+  'status-in-review': #6a55cc,
+  'status-done': #1c7a50,
+  'status-cancelled': #a0a0a8,
+
+  // Task priority
+  'priority-urgent': #d0352c,
+  'priority-high': #cf6418,
+  'priority-medium': #6c6c75,
+  'priority-low': #a0a0a8,
+
+  'backdrop': rgba(18, 18, 22, 0.28),
+  'skeleton': #ececef
+);
+
+$dark: (
+  'canvas': #0e0f11,
+  'surface': #141517,
+  'surface-raised': #1b1c1f,
+  'surface-subtle': #121315,
+  'surface-sunken': #111214,
+  'sidebar': #0e0f11,
+
+  'border': #25262a,
+  'border-subtle': #1d1e21,
+  'border-strong': #35373c,
+
+  'text': #ebebee,
+  'text-secondary': #a2a2ab,
+  'text-tertiary': #6e6f78,
+  'text-disabled': #4a4b52,
+  'text-inverse': #111214,
+
+  // Inverted ink: a light primary reads as the strongest element on a dark canvas.
+  'primary': #ebebee,
+  'primary-hover': #ffffff,
+  'primary-text': #111214,
+
+  'accent': #8592ff,
+  'accent-hover': #9ea8ff,
+  'accent-subtle': rgba(133, 146, 255, 0.13),
+  'accent-text': #a5aeff,
+
+  'state-hover': rgba(255, 255, 255, 0.045),
+  'state-pressed': rgba(255, 255, 255, 0.08),
+  'state-selected': rgba(133, 146, 255, 0.13),
+  'focus-ring': rgba(133, 146, 255, 0.5),
+  'success': #4bb37f,
+  'success-subtle': rgba(75, 179, 127, 0.13),
+  'warning': #dca043,
+  'warning-subtle': rgba(220, 160, 67, 0.13),
+  'danger': #ee6159,
+  'danger-hover': #f37b74,
+  'danger-subtle': rgba(238, 97, 89, 0.13),
+  'status-backlog': #6e6f78,
+  'status-todo': #a2a2ab,
+  'status-in-progress': #dca043,
+  'status-in-review': #9a89ef,
+  'status-done': #4bb37f,
+  'status-cancelled': #6e6f78,
+
+  'priority-urgent': #ee6159,
+  'priority-high': #e8883c,
+  'priority-medium': #a2a2ab,
+  'priority-low': #6e6f78,
+
+  'backdrop': rgba(0, 0, 0, 0.55),
+  'skeleton': #1f2023,
+);
+
+// Elevation is theme-specific: light uses soft ambient shadows, dark relies on a hairline ring
+// plus a deep shadow that only reads against the canvas.
+$light-shadows: (
+  'sm': '0 1px 2px rgba(16, 16, 20, 0.05)',
+  'card': '0 1px 2px rgba(16, 16, 20, 0.04), 0 0 0 1px rgba(16, 16, 20, 0.02)',
+  'overlay':
+    '0 0 0 1px rgba(16, 16, 20, 0.06), 0 8px 24px rgba(16, 16, 20, 0.1), 0 2px 6px rgba(16, 16, 20, 0.05)',
+  'drag': '0 0 0 1px rgba(16, 16, 20, 0.06), 0 12px 28px rgba(16, 16, 20, 0.16)',
+);
+
+$dark-shadows: (
+  'sm': '0 1px 2px rgba(0, 0, 0, 0.4)',
+  'card': '0 1px 2px rgba(0, 0, 0, 0.35)',
+  'overlay': '0 0 0 1px #2c2d32, 0 12px 32px rgba(0, 0, 0, 0.55)',
+  'drag': '0 0 0 1px #3a3c42, 0 16px 36px rgba(0, 0, 0, 0.6)',
+);
+
+// Avatar tint: lightness/saturation per theme, the hue comes from the person (see avatar.ts).
+$light-avatar: (
+  'bg': '42% 91%',
+  'fg': '38% 32%',
+);
+$dark-avatar: (
+  'bg': '22% 24%',
+  'fg': '45% 78%',
+);
+
+// ---------------------------------------------------------------------------------------------
+// Scales — shared by both themes
+// ---------------------------------------------------------------------------------------------
+
+// 4px grid; 6px exists for the tight gaps inside dense rows.
+$space: (
+  '0': 0,
+  '1': 4px,
+  '1-5': 6px,
+  '2': 8px,
+  '2-5': 10px,
+  '3': 12px,
+  '4': 16px,
+  '5': 20px,
+  '6': 24px,
+  '8': 32px,
+  '10': 40px,
+  '12': 48px,
+  '16': 64px,
+);
+
+// Type scale: 13px is the working size of the interface (enterprise density).
+$font-size: (
+  'micro': 11px,
+  'meta': 12px,
+  'body': 13px,
+  'body-lg': 14px,
+  'heading-sm': 15px,
+  'heading': 18px,
+  'title': 22px,
+  'display': 26px,
+  'figure': 28px,
+);
+
+$line-height: (
+  'micro': 14px,
+  'meta': 16px,
+  'body': 20px,
+  'body-lg': 22px,
+  'heading-sm': 22px,
+  'heading': 26px,
+  'title': 30px,
+  'display': 34px,
+  'figure': 32px,
+);
+
+@mixin emit($map, $prefix) {
+  @each $name, $value in $map {
+    --#{$prefix}-#{$name}: #{$value};
+  }
+}
+
+:root {
+  color-scheme: light;
+  @include emit($light, 'color');
+  @include emit($light-shadows, 'shadow');
+  @include emit($light-avatar, 'avatar');
+
+  @include emit($space, 'space');
+  @include emit($font-size, 'font-size');
+  @include emit($line-height, 'line-height');
+
+  // Typography
+  --font-family: Geist, 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-family-mono: 'Geist Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --letter-spacing-tight: -0.011em;
+  --letter-spacing-tighter: -0.02em;
+  --letter-spacing-caps: 0.04em;
+
+  // Borders and radii: hairlines, small radii. Full rounding is for avatars only.
+  --border-width: 1px;
+  --border: var(--border-width) solid var(--color-border);
+  --border-subtle: var(--border-width) solid var(--color-border-subtle);
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 999px;
+
+  // Motion: short and functional; disabled under prefers-reduced-motion (see _base.scss).
+  --duration-instant: 80ms;
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 240ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --transition-colors:
+    color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+
+  // Layers
+  --z-base: 0;
+  --z-raised: 1;
+  --z-sticky: 10;
+  --z-shell: 20;
+  --z-overlay: 1000;
+  --z-toast: 1100;
+
+  // Component states
+  --opacity-disabled: 0.45;
+  --focus-ring: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-focus-ring);
+
+  // Sizes
+  --control-height-sm: 26px;
+  --control-height: 30px;
+  --control-height-lg: 36px;
+  --row-height: 36px;
+  --icon-size: 16px;
+
+  // Layout
+  --sidebar-width: 236px;
+  --header-height: 48px;
+  --side-panel-width: 560px;
+  --content-max-width: 1240px;
+  --column-width: 284px;
+}
+
+// Explicit choice, or the system preference when the user has not picked one (theme.ts sets
+// `data-theme` before the first paint, see index.html).
+[data-theme='dark'] {
+  color-scheme: dark;
+  @include emit($dark, 'color');
+  @include emit($dark-shadows, 'shadow');
+  @include emit($dark-avatar, 'avatar');
+}

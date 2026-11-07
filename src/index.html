@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Veltris</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap"
+    />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-title" content="Veltris" />
+    <meta name="theme-color" content="#f6f6f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e0f11" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="Projects, tasks and boards for teams that plan carefully." />
+    <script>
+      // Applies the theme before the first paint so a dark-theme user never sees a white flash.
+      // Must match core/theme.ts (storage key and values).
+      (function () {
+        var stored = null;
+        try {
+          stored = localStorage.getItem('veltris.theme');
+        } catch (e) {}
+        var dark =
+          stored === 'dark' ||
+          (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- Shown while the session is restored; Angular replaces it once the app has started. -->
+    <app-root>
+      <div
+        role="status"
+        aria-label="Loading Veltris"
+        style="display: grid; place-items: center; min-height: 100vh"
+      >
+        <img src="icons/favicon.svg" alt="" width="32" height="32" />
+      </div>
+    </app-root>
+    <noscript>Please enable JavaScript to continue using this application.</noscript>
+  </body>
+</html>
