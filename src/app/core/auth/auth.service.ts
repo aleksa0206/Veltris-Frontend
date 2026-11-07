@@ -70,7 +70,9 @@ export class AuthService {
     lastName: string;
     email: string;
     password: string;
-    workspaceName: string;
+    /** One or the other: a new workspace, or the invitation to join. */
+    workspaceName?: string;
+    invitationToken?: string;
   }): Observable<void> {
     return this.http
       .post<LoginResponse>(apiUrl('/auth/register'), body, WITH_COOKIE)

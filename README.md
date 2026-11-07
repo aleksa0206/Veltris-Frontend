@@ -12,6 +12,8 @@ Angular client for Veltris, a project management tool for teams: workspaces with
 - **Projects** — a data table with status, lead, progress, open and overdue counts and target date; filter by status, search by name or key, sort, paginate. Create and edit projects in a modal; the key is suggested from the name.
 - **Board** — one column per status, cards with identifier, priority, due date, subtask progress, comments and assignee. Drag and drop between and within columns (saved as a single request), quick add per column, filters by text, assignee and priority (kept in the URL). Clicking a card opens it in a side panel.
 - **Task details** — title and description edited in place, a property rail (status, priority, assignee, due date, project, reporter, dates), subtasks with one-click completion, and a timeline that merges comments with the change history.
+- **Members** — everyone in the workspace with their role; owners and admins change roles, remove members and invite people by email (an existing account joins at once, anyone else gets a 7-day link), with a list of pending invitations to revoke. Anyone but the owner can leave.
+- **Invitation link** (`/invite`) — shows who invited you where; join with one click when signed in with the invited address, sign in, or create an account that joins that workspace directly.
 - **Command palette** (`Ctrl/⌘ K`) — jump to any task by title or identifier (`WEB-12`), any project or page, create a project, switch theme, sign out.
 - Sign-in with optional two-factor authentication, sign-up (creates your first workspace), password reset, account page; several workspaces with a switcher.
 
@@ -51,7 +53,8 @@ src/app/
   shared/     UI components (pickers, indicators, header, side panel, task row, dialogs, toast,
               tooltip, icons), utilities (dates, task texts, formatting), editors
   layout/     app shell (sidebar, drawer on small screens), command palette, auth layout
-  features/   overview, projects, board, tasks (detail, timeline, dialog), workspace, account, auth
+  features/   overview, projects, board, tasks (detail, timeline, dialog), members, workspace,
+              account, auth (incl. the invitation page)
 src/styles/   tokens → CSS variables (light and dark), mixins, reset, base primitives
 ```
 

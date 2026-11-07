@@ -8,6 +8,7 @@ export class AppTitleStrategy extends TitleStrategy {
 
   override updateTitle(snapshot: RouterStateSnapshot): void {
     const pageTitle = this.buildTitle(snapshot);
-    this.title.setTitle(pageTitle ? `${pageTitle} · Veltris` : 'Veltris');
+    // Untitled routes (board, task) set the title themselves from loaded data.
+    if (pageTitle) this.title.setTitle(`${pageTitle} · Veltris`);
   }
 }

@@ -52,7 +52,11 @@ const KNOWN_MESSAGES: ReadonlyArray<[RegExp, string | ((m: RegExpMatchArray) => 
   [/^An account with this email already exists$/, 'An account with this email already exists.'],
   [/must be a member of the workspace/, 'That person is not a member of this workspace.'],
   [/already a member/, 'This person is already a member of the workspace.'],
-  [/^User not found$/, 'There is no Veltris account with this email.'],
+  [/invitation is no longer valid/, 'This invitation has expired or has already been used.'],
+  [/sent to a different email/, 'This invitation was sent to a different email address.'],
+  [/address the invitation was sent to/, 'Use the email address the invitation was sent to.'],
+  [/owner.s role cannot be changed/, 'The owner’s role cannot be changed.'],
+  [/owner cannot leave/, 'The owner cannot leave or be removed from the workspace.'],
   [/owners and admins/, 'Only workspace owners and admins can do this.'],
   [
     /reporter or a workspace admin/,

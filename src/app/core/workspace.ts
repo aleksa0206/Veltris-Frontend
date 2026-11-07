@@ -48,9 +48,12 @@ export class WorkspaceContext {
     localStorage.setItem(STORAGE_KEY, String(id));
   }
 
-  /** After creating a workspace: reload the list and switch to it. */
-  async reload(selectId: number): Promise<void> {
+  /**
+   * Reloads the list after joining, creating or leaving a workspace, and switches to `selectId`
+   * when given (otherwise `current` falls back to the first one if the old one is gone).
+   */
+  async reload(selectId?: number): Promise<void> {
     this.workspaces.set(await firstValueFrom(this.api.mine()));
-    this.select(selectId);
+    if (selectId !== undefined) this.select(selectId);
   }
 }

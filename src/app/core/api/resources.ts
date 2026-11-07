@@ -5,9 +5,11 @@ import { apiUrl, toParams } from './http';
 import {
   Activity,
   Comment,
+  InvitationPreview,
   Member,
   Overview,
   Paged,
+  PendingInvitation,
   ProjectStatus,
   ProjectWithCounts,
   Project,
@@ -56,8 +58,30 @@ export class WorkspacesApi {
   create(name: string): Observable<Workspace> {
     return this.http.post<Workspace>(apiUrl('/workspaces'), { name });
   }
-  addMember(id: number, body: { email: string; role: 'Admin' | 'Member' }): Observable<Member[]> {
-    return this.http.post<Member[]>(apiUrl(`/workspaces/${id}/members`), body);
+  /** An existing account is added at once; anyone else gets an invitation email. */
+  invite(
+    id: number,
+    body: { email: string; role: AssignableRole },
+  ): Observable<{ outcome: 'added' | 'invited' }> {
+    return this.http.post<{ outcome: 'added' | 'invited' }>(
+      apiUrl(`/workspaces/${id}/members`),
+      body,
+    );
+  }
+  changeRole(id: number, userId: number, role: AssignableRole): Observable<Member[]> {
+    return this.http.put<Member[]>(apiUrl(`/workspaces/${id}/members/${userId}`), { role });
+  }
+  /** Removes a member, or leaves the workspace when `userId` is the caller. */
+  removeMember(id: number, userId: number): Observable<{ unassignedTasks: number }> {
+    return this.http.delete<{ unassignedTasks: number }>(
+      apiUrl(`/workspaces/${id}/members/${userId}`),
+    );
+  }
+  invitations(id: number): Observable<PendingInvitation[]> {
+    return this.http.get<PendingInvitation[]>(apiUrl(`/workspaces/${id}/invitations`));
+  }
+  revokeInvitation(id: number, invitationId: number): Observable<unknown> {
+    return this.http.delete(apiUrl(`/workspaces/${id}/invitations/${invitationId}`));
   }
   /** `today` is the user's calendar day (`YYYY-MM-DD`). */
   overview(id: number, today: string): Observable<Overview> {
@@ -185,5 +209,20 @@ export class TasksApi {
   }
   activity(id: number): Observable<Activity[]> {
     return this.http.get<Activity[]>(apiUrl(`/tasks/${id}/activity`));
+  }
+}
+
+export type AssignableRole = 'Admin' | 'Member';
+
+@Injectable({ providedIn: 'root' })
+export class InvitationsApi {
+  private readonly http = inject(HttpClient);
+
+  /** Public: anyone holding the link can see who invited them where. */
+  preview(token: string): Observable<InvitationPreview> {
+    return this.http.post<InvitationPreview>(apiUrl('/invitations/preview'), { token });
+  }
+  accept(token: string): Observable<{ workspaceId: number }> {
+    return this.http.post<{ workspaceId: number }>(apiUrl('/invitations/accept'), { token });
   }
 }

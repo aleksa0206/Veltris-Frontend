@@ -177,3 +177,22 @@ export interface Overview {
   activity: WorkspaceActivity[];
   stats: { open: number; overdue: number; dueThisWeek: number; completedThisWeek: number };
 }
+
+export interface PendingInvitation {
+  id: number;
+  email: string;
+  role: WorkspaceRole;
+  invitedBy: PersonRef;
+  expiresAt: IsoDateString;
+  createdAt: IsoDateString;
+}
+
+export interface InvitationPreview {
+  status: 'open' | 'accepted' | 'expired';
+  email: string;
+  role: WorkspaceRole;
+  workspace: { id: number; name: string };
+  invitedBy: PersonRef;
+  /** Whether the invited email already has an account (sign in) or not (sign up). */
+  hasAccount: boolean;
+}

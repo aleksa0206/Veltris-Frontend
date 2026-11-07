@@ -1,0 +1,171 @@
+<div class="page">
+  <app-header [crumbs]="crumbs()" />
+
+  <div class="page__body">
+    <div class="layout">
+      <div class="layout__main">
+        <section aria-labelledby="members-heading">
+          <div class="section-head">
+            <h2 id="members-heading">Members</h2>
+            <span class="text-meta tabular">{{ workspace.members().length }}</span>
+          </div>
+
+          @if (details.error(); as error) {
+            <div class="panel"><app-load-error [error]="error" (retry)="details.reload()" /></div>
+          } @else {
+            <div class="panel">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">Person</th>
+                    <th scope="col">Role</th>
+                    <th scope="col"><span class="visually-hidden">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (member of workspace.members(); track member.id) {
+                    <tr>
+                      <td>
+                        <span class="person">
+                          <app-avatar [person]="member" [size]="28" />
+                          <span class="person__text">
+                            <span class="person__name">
+                              {{ member | fullName }}
+                              @if (isMe(member)) {
+                                <span class="text-tertiary">(you)</span>
+                              }
+                            </span>
+                            <span class="text-meta">{{ member.email }}</span>
+                          </span>
+                        </span>
+                      </td>
+                      <td class="cell-role">
+                        @if (workspace.canManage() && member.role !== 'Owner') {
+                          <app-picker
+                            appearance="button"
+                            [label]="'Role of ' + (member | fullName)"
+                            [options]="roleOptions"
+                            [value]="$any(member.role)"
+                            (valueChange)="changeRole(member, $event)"
+                          />
+                        } @else {
+                          <span class="role">{{ roleLabels[member.role] }}</span>
+                        }
+                        <span class="role__hint text-meta">{{ roleHints[member.role] }}</span>
+                      </td>
+                      <td class="cell-actions">
+                        @if (member.role !== 'Owner' && (workspace.canManage() || isMe(member))) {
+                          <button
+                            type="button"
+                            class="btn btn--ghost btn--icon btn--sm"
+                            [attr.aria-label]="'Actions for ' + (member | fullName)"
+                            [cdkMenuTriggerFor]="memberMenu"
+                            [cdkMenuTriggerData]="{ $implicit: member }"
+                          >
+                            <app-icon name="more" />
+                          </button>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+
+        @if (workspace.canManage()) {
+          <section aria-labelledby="pending-heading">
+            <div class="section-head">
+              <h2 id="pending-heading">Pending invitations</h2>
+            </div>
+            <div class="panel">
+              @if (invitations.error(); as error) {
+                <app-load-error [error]="error" (retry)="invitations.reload()" />
+              } @else if (invitations.value()?.length === 0) {
+                <app-empty-state
+                  icon="inbox"
+                  title="No pending invitations"
+                  description="People you invite by email appear here until they join."
+                />
+              } @else {
+                <ul class="invitations">
+                  @for (invitation of invitations.value() ?? []; track invitation.id) {
+                    <li class="invitation">
+                      <app-icon name="clock" class="text-tertiary" />
+                      <span class="invitation__email">{{ invitation.email }}</span>
+                      <span class="text-meta">
+                        {{ roleLabels[invitation.role] }} · invited by
+                        {{ invitation.invitedBy | fullName }} · expires
+                        {{ invitation.expiresAt | calendarDate }}
+                      </span>
+                      <button
+                        type="button"
+                        class="btn btn--ghost btn--sm"
+                        (click)="revoke(invitation.id, invitation.email)"
+                      >
+                        Revoke
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </section>
+        }
+      </div>
+
+      @if (workspace.canManage()) {
+        <aside class="layout__aside">
+          <form class="invite panel" [formGroup]="inviteForm" (ngSubmit)="invite()" novalidate>
+            <h2 class="invite__title">Invite people</h2>
+            <p class="text-secondary invite__lead">
+              Someone with a Veltris account joins right away. Anyone else gets an email with a link
+              that is valid for 7 days.
+            </p>
+            @if (inviteError(); as message) {
+              <p class="form-error" role="alert">{{ message }}</p>
+            }
+            <app-field label="Email">
+              <input
+                class="input"
+                type="email"
+                appFieldControl
+                formControlName="email"
+                placeholder="name@company.com"
+                autocomplete="off"
+              />
+            </app-field>
+            <app-field label="Role">
+              <select class="select role-select" appFieldControl formControlName="role">
+                @for (option of roleOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </app-field>
+            <button type="submit" class="btn btn--primary" [disabled]="inviting()">
+              @if (inviting()) {
+                <span class="spinner" aria-hidden="true"></span>
+              }
+              Send invitation
+            </button>
+          </form>
+        </aside>
+      }
+    </div>
+  </div>
+</div>
+
+<ng-template #memberMenu let-member>
+  <div class="menu" cdkMenu>
+    <button
+      type="button"
+      class="menu__item menu__item--danger"
+      cdkMenuItem
+      (cdkMenuItemTriggered)="remove(member)"
+    >
+      <app-icon name="logout" />
+      {{ isMe(member) ? 'Leave workspace' : 'Remove from workspace' }}
+    </button>
+  </div>
+</ng-template>

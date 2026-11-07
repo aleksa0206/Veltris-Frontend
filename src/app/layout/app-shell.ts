@@ -27,6 +27,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { label: 'Overview', path: '/', icon: 'home', exact: true },
   { label: 'Projects', path: '/projects', icon: 'folder', exact: true },
+  { label: 'Members', path: '/members', icon: 'users', exact: true },
 ];
 
 const THEMES: Array<{ value: ThemePreference; label: string; icon: IconName }> = [

@@ -33,6 +33,9 @@ export const routes: Routes = [
   ),
   // This path must stay as is: the backend embeds it in the email (FRONTEND_URL/reset-password?token=...).
   authPage('reset-password', 'New password', () => import('./features/auth/reset-password.page')),
+  // Same rule: invitation emails link to FRONTEND_URL/invite?token=... Open to everyone; the page
+  // adapts to whether and as whom the visitor is signed in.
+  authPage('invite', 'Invitation', () => import('./features/auth/invite.page')),
   {
     path: '',
     component: AppShell,
@@ -50,16 +53,21 @@ export const routes: Routes = [
         title: 'Projects',
         loadComponent: () => import('./features/projects/projects.page'),
       },
+      // No route title: these pages name the tab after the project / task once it has loaded,
+      // and AppTitleStrategy leaves untitled routes alone (also when only ?task= changes).
       {
         // ?task=<id> opens that task in the side panel over the board.
         path: 'projects/:projectId',
-        title: 'Board',
         loadComponent: () => import('./features/board/board.page'),
       },
       {
         path: 'tasks/:taskId',
-        title: 'Task',
         loadComponent: () => import('./features/tasks/task.page'),
+      },
+      {
+        path: 'members',
+        title: 'Members',
+        loadComponent: () => import('./features/members/members.page'),
       },
       {
         path: 'account',
