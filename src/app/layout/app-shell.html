@@ -1,0 +1,179 @@
+<a class="skip-link" href="#main">Skip to content</a>
+
+<ng-template #workspaceMenu>
+  <div class="menu workspace-menu" cdkMenu>
+    <p class="menu__label">Workspaces</p>
+    @for (ws of workspace.workspaces(); track ws.id) {
+      <button
+        type="button"
+        class="menu__item"
+        cdkMenuItemRadio
+        [cdkMenuItemChecked]="ws.id === workspace.id()"
+        (cdkMenuItemTriggered)="switchWorkspace(ws.id)"
+      >
+        <span class="workspace-mark workspace-mark--sm" aria-hidden="true">{{
+          ws.name.charAt(0)
+        }}</span>
+        <span class="workspace-menu__name">{{ ws.name }}</span>
+        <span class="text-meta">{{ roleLabels[ws.role] }}</span>
+        @if (ws.id === workspace.id()) {
+          <app-icon name="check" [size]="14" class="menu__check" />
+        }
+      </button>
+    }
+    <div class="menu__separator"></div>
+    <button
+      type="button"
+      class="menu__item"
+      cdkMenuItem
+      (cdkMenuItemTriggered)="editors.workspace()"
+    >
+      <app-icon name="plus" /> New workspace
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #userMenu>
+  @if (auth.user(); as user) {
+    <div class="menu" cdkMenu>
+      <div class="user-menu__header">
+        <strong>{{ user | fullName }}</strong>
+        <span class="text-meta">{{ user.email }}</span>
+      </div>
+      <div class="menu__separator"></div>
+      <p class="menu__label">Theme</p>
+      @for (option of themes; track option.value) {
+        <button
+          type="button"
+          class="menu__item"
+          cdkMenuItemRadio
+          [cdkMenuItemChecked]="theme.preference() === option.value"
+          (cdkMenuItemTriggered)="theme.set(option.value)"
+        >
+          <app-icon [name]="option.icon" /> {{ option.label }}
+          @if (theme.preference() === option.value) {
+            <app-icon name="check" [size]="14" class="menu__check" />
+          }
+        </button>
+      }
+      <div class="menu__separator"></div>
+      <a class="menu__item" cdkMenuItem routerLink="/account"> <app-icon name="user" /> Account </a>
+      <button type="button" class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="auth.logout()">
+        <app-icon name="logout" /> Sign out
+      </button>
+    </div>
+  }
+</ng-template>
+
+<div class="shell" [class.shell--nav-open]="shell.navOpen()">
+  <aside class="sidebar" aria-label="Sidebar">
+    <div class="sidebar__top">
+      @if (workspace.current(); as ws) {
+        <button
+          type="button"
+          class="workspace-switcher"
+          [cdkMenuTriggerFor]="workspaceMenu"
+          aria-label="Switch workspace"
+        >
+          <span class="workspace-mark" aria-hidden="true">{{ ws.name.charAt(0) }}</span>
+          <span class="workspace-switcher__name">{{ ws.name }}</span>
+          <app-icon name="chevronUpDown" [size]="14" />
+        </button>
+      }
+
+      <button type="button" class="search-trigger" (click)="shell.paletteOpen.set(true)">
+        <app-icon name="search" [size]="14" />
+        <span>Search or jump to…</span>
+        <kbd>{{ isMac ? '⌘' : 'Ctrl' }}</kbd
+        ><kbd>K</kbd>
+      </button>
+    </div>
+
+    <nav class="sidebar__nav" aria-label="Main navigation">
+      <ul class="nav">
+        @for (item of nav; track item.path) {
+          <li>
+            <a
+              class="nav__link"
+              [routerLink]="item.path"
+              routerLinkActive="is-active"
+              [routerLinkActiveOptions]="{ exact: !!item.exact }"
+              ariaCurrentWhenActive="page"
+            >
+              <app-icon [name]="item.icon" />
+              {{ item.label }}
+            </a>
+          </li>
+        }
+      </ul>
+
+      <div class="nav__group">
+        <div class="nav__group-header">
+          <span id="nav-projects">Active projects</span>
+          <button
+            type="button"
+            class="btn btn--ghost btn--icon btn--sm"
+            aria-label="New project"
+            (click)="editors.project()"
+          >
+            <app-icon name="plus" [size]="14" />
+          </button>
+        </div>
+        <ul class="nav" aria-labelledby="nav-projects">
+          @for (project of projectList(); track project.id) {
+            <li>
+              <a
+                class="nav__link"
+                [routerLink]="['/projects', project.id]"
+                routerLinkActive="is-active"
+                ariaCurrentWhenActive="page"
+              >
+                <span class="nav__key mono">{{ project.key }}</span>
+                <span class="nav__label">{{ project.name }}</span>
+              </a>
+            </li>
+          } @empty {
+            @if (projects.hasValue()) {
+              <li class="nav__empty">No active projects</li>
+            }
+          }
+        </ul>
+      </div>
+    </nav>
+
+    <div class="sidebar__footer">
+      @if (auth.user(); as user) {
+        <button
+          type="button"
+          class="sidebar__user"
+          [cdkMenuTriggerFor]="userMenu"
+          aria-label="Account and theme"
+        >
+          <app-avatar [person]="user" [size]="24" />
+          <span class="sidebar__user-name">{{ user | fullName }}</span>
+          <app-icon name="more" [size]="16" />
+        </button>
+      }
+      <button
+        type="button"
+        class="btn btn--ghost btn--icon"
+        [attr.aria-label]="
+          theme.resolved() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
+        "
+        (click)="theme.toggle()"
+      >
+        <app-icon [name]="theme.resolved() === 'dark' ? 'sun' : 'moon'" />
+      </button>
+    </div>
+  </aside>
+
+  <div class="shell__scrim" (click)="shell.navOpen.set(false)" aria-hidden="true"></div>
+
+  <main id="main" class="shell__main" tabindex="-1">
+    <router-outlet />
+  </main>
+</div>
+
+@if (shell.paletteOpen()) {
+  <app-command-palette (closed)="shell.paletteOpen.set(false)" />
+}
