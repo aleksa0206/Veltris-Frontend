@@ -1,0 +1,199 @@
+<div class="page">
+  <app-header [crumbs]="crumbs()">
+    @if (project.value(); as p) {
+      <button
+        type="button"
+        class="btn btn--ghost btn--icon"
+        aria-label="Project actions"
+        [cdkMenuTriggerFor]="projectMenu"
+      >
+        <app-icon name="more" />
+      </button>
+      <button type="button" class="btn btn--primary" (click)="editors.task({ projectId: p.id })">
+        <app-icon name="plus" /> New task
+      </button>
+    }
+  </app-header>
+
+  @if (project.error(); as error) {
+    <div class="page__body"><app-load-error [error]="error" (retry)="project.reload()" /></div>
+  } @else {
+    <div class="board-bar">
+      <label class="board-search">
+        <app-icon name="search" [size]="14" />
+        <span class="visually-hidden">Filter cards</span>
+        <input
+          #search
+          type="search"
+          placeholder="Filter cards"
+          [value]="q() ?? ''"
+          (input)="updateQuery({ q: search.value || null })"
+        />
+      </label>
+      <app-picker
+        label="Assignee"
+        appearance="button"
+        [options]="assigneeOptions()"
+        [value]="assignee() ?? ''"
+        (valueChange)="updateQuery({ assignee: $event || null })"
+      >
+        <ng-template appPickerOption let-option>
+          @if (person(option.value); as m) {
+            <app-avatar [person]="m" [size]="16" />
+          } @else {
+            <app-icon name="user" [size]="14" />
+          }
+          {{ option.label }}
+        </ng-template>
+      </app-picker>
+      <app-picker
+        label="Priority"
+        appearance="button"
+        [options]="priorityOptions"
+        [value]="filter().priority"
+        (valueChange)="updateQuery({ priority: $event || null })"
+      >
+        <ng-template appPickerOption let-option>
+          @if (option.value) {
+            <app-priority-icon [priority]="option.value" decorative />
+          }
+          {{ option.label }}
+        </ng-template>
+      </app-picker>
+      @if (isFiltered()) {
+        <button
+          type="button"
+          class="btn btn--ghost btn--sm"
+          (click)="updateQuery({ q: null, assignee: null, priority: null })"
+        >
+          Clear
+        </button>
+      }
+
+      <span class="toolbar__spacer"></span>
+
+      @if (project.value(); as p) {
+        <dl class="board-summary">
+          @if (p.lead; as lead) {
+            <dt class="visually-hidden">Lead</dt>
+            <dd [appTooltip]="'Lead: ' + lead.firstName + ' ' + (lead.lastName ?? '')">
+              <app-avatar [person]="lead" [size]="20" />
+            </dd>
+          }
+          <dt class="visually-hidden">Progress</dt>
+          <dd class="board-summary__progress">
+            <span class="progress" aria-hidden="true"
+              ><span [style.width.%]="projectProgress()"></span
+            ></span>
+            <span class="tabular">{{ p.tasks.done }}/{{ p.tasks.total }} done</span>
+          </dd>
+          @if (p.targetDate) {
+            <dt class="visually-hidden">Target date</dt>
+            <dd class="text-secondary">
+              <app-icon name="calendar" [size]="14" /> {{ calendarDate(p.targetDate) }}
+            </dd>
+          }
+        </dl>
+      }
+    </div>
+
+    <div class="board" cdkDropListGroup>
+      @for (status of statuses; track status) {
+        <section class="column" [attr.aria-labelledby]="'column-' + status">
+          <header class="column__header">
+            <app-status-icon [status]="status" decorative />
+            <h2 [id]="'column-' + status">{{ statusLabels[status] }}</h2>
+            <span class="column__count tabular">{{ visible()?.[status]?.length ?? '' }}</span>
+            <button
+              type="button"
+              class="btn btn--ghost btn--icon btn--sm column__add"
+              [attr.aria-label]="'Add task to ' + statusLabels[status]"
+              (click)="addingTo.set(status)"
+            >
+              <app-icon name="plus" [size]="14" />
+            </button>
+          </header>
+
+          <div
+            class="column__cards"
+            cdkDropList
+            [cdkDropListData]="status"
+            (cdkDropListDropped)="drop($event)"
+          >
+            @if (visible(); as cols) {
+              @for (task of cols[status]; track task.id) {
+                <app-board-card cdkDrag [cdkDragData]="task" [task]="task">
+                  <div class="card-placeholder" *cdkDragPlaceholder></div>
+                </app-board-card>
+              }
+            } @else {
+              <span class="skeleton card-skeleton"></span>
+              <span class="skeleton card-skeleton"></span>
+            }
+
+            @if (addingTo() === status) {
+              <form class="quick-add" (submit)="$event.preventDefault(); quickAdd(status, quick)">
+                <input
+                  #quick
+                  aria-label="New task title"
+                  placeholder="Task title, then Enter"
+                  maxlength="191"
+                  appAutofocus
+                  (keydown.escape)="$event.stopPropagation(); addingTo.set(null)"
+                  (blur)="quick.value.trim() || addingTo.set(null)"
+                />
+              </form>
+            } @else if (visible()?.[status]?.length === 0) {
+              <p class="column__empty">{{ isFiltered() ? 'No matching cards' : 'No tasks' }}</p>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>
+
+<ng-template #projectMenu>
+  @if (project.value(); as p) {
+    <div class="menu" cdkMenu>
+      <button
+        type="button"
+        class="menu__item"
+        cdkMenuItem
+        (cdkMenuItemTriggered)="editors.project(p)"
+      >
+        <app-icon name="pencil" /> Edit project
+      </button>
+      @if (workspace.canManage()) {
+        <div class="menu__separator"></div>
+        <button
+          type="button"
+          class="menu__item menu__item--danger"
+          cdkMenuItem
+          (cdkMenuItemTriggered)="deleteProject()"
+        >
+          <app-icon name="trash" /> Delete project
+        </button>
+      }
+    </div>
+  }
+</ng-template>
+
+@if (openTaskId(); as taskId) {
+  <app-side-panel label="Task" (closed)="closePanel()">
+    <div class="panel-bar">
+      <a class="btn btn--ghost btn--sm" [routerLink]="['/tasks', taskId]">
+        <app-icon name="expand" [size]="14" /> Open full page
+      </a>
+      <button
+        type="button"
+        class="btn btn--ghost btn--icon btn--sm"
+        aria-label="Close"
+        (click)="closePanel()"
+      >
+        <app-icon name="x" />
+      </button>
+    </div>
+    <app-task-detail class="panel-detail" variant="panel" [taskId]="taskId" />
+  </app-side-panel>
+}
