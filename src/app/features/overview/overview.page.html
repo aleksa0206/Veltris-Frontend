@@ -1,0 +1,169 @@
+<div class="page">
+  <app-header [crumbs]="crumbs()">
+    <button type="button" class="btn" (click)="editors.project()">New project</button>
+    <button type="button" class="btn btn--primary" (click)="editors.task()">
+      <app-icon name="plus" /> New task
+    </button>
+  </app-header>
+
+  <div class="page__body">
+    <div class="intro">
+      <h2 class="intro__greeting">{{ greeting() }}</h2>
+      <p class="text-tertiary">{{ dateLine }}</p>
+    </div>
+
+    @if (overview.error(); as error) {
+      <div class="panel"><app-load-error [error]="error" (retry)="overview.reload()" /></div>
+    } @else {
+      @let data = overview.value();
+
+      <dl class="figures" [attr.aria-busy]="!data">
+        <div class="figure">
+          <dt>Open tasks</dt>
+          <dd>{{ data?.stats?.open ?? '–' }}</dd>
+        </div>
+        <div class="figure" [class.figure--danger]="(data?.stats?.overdue ?? 0) > 0">
+          <dt>Overdue</dt>
+          <dd>{{ data?.stats?.overdue ?? '–' }}</dd>
+        </div>
+        <div class="figure">
+          <dt>Due in the next 7 days</dt>
+          <dd>{{ data?.stats?.dueThisWeek ?? '–' }}</dd>
+        </div>
+        <div class="figure">
+          <dt>Completed this week</dt>
+          <dd>{{ data?.stats?.completedThisWeek ?? '–' }}</dd>
+        </div>
+      </dl>
+
+      <div class="layout">
+        <div class="layout__main">
+          <section aria-labelledby="mine-heading">
+            <div class="section-head">
+              <h2 id="mine-heading">Assigned to you</h2>
+              @if (data && data.myTasksTotal > data.myTasks.length) {
+                <span class="text-meta"
+                  >{{ data.myTasks.length }} of {{ data.myTasksTotal }}, soonest first</span
+                >
+              }
+            </div>
+            <div class="panel">
+              @if (!data) {
+                <div class="loading-rows" aria-hidden="true">
+                  @for (row of [1, 2, 3, 4]; track row) {
+                    <span class="skeleton" [style.width.%]="50 + row * 9"></span>
+                  }
+                </div>
+              } @else if (groups().length === 0) {
+                <app-empty-state
+                  icon="checkCircle"
+                  title="Nothing assigned to you"
+                  description="Open tasks assigned to you in this workspace appear here."
+                />
+              } @else {
+                @for (group of groups(); track group.label) {
+                  <h3 class="group-label" [class.group-label--danger]="group.tone === 'danger'">
+                    {{ group.label }} <span class="tabular">{{ group.tasks.length }}</span>
+                  </h3>
+                  <ul>
+                    @for (task of group.tasks; track task.id) {
+                      <li appTaskRow [task]="task"></li>
+                    }
+                  </ul>
+                }
+              }
+            </div>
+          </section>
+
+          <section aria-labelledby="projects-heading">
+            <div class="section-head">
+              <h2 id="projects-heading">Projects in progress</h2>
+              <a routerLink="/projects" class="section-head__link">
+                All projects <app-icon name="arrowRight" [size]="14" />
+              </a>
+            </div>
+            <div class="panel">
+              @if (data?.projects?.length === 0) {
+                <app-empty-state
+                  icon="folder"
+                  title="No projects in progress"
+                  description="Active and on-hold projects are listed here with their progress."
+                >
+                  <button type="button" class="btn" (click)="editors.project()">
+                    Create project
+                  </button>
+                </app-empty-state>
+              } @else {
+                <ul class="projects">
+                  @for (project of data?.projects ?? []; track project.id) {
+                    <li class="project">
+                      <span class="mono project__key">{{ project.key }}</span>
+                      <a class="project__name" [routerLink]="['/projects', project.id]">{{
+                        project.name
+                      }}</a>
+                      @if (project.status === 'OnHold') {
+                        <span class="badge">{{ statusLabels[project.status] }}</span>
+                      }
+                      <span class="project__progress">
+                        <span class="progress" aria-hidden="true">
+                          <span
+                            [style.width.%]="percent(project.tasks.done, project.tasks.total)"
+                          ></span>
+                        </span>
+                        <span class="tabular"
+                          >{{ percent(project.tasks.done, project.tasks.total) }}%</span
+                        >
+                      </span>
+                      <span
+                        class="project__overdue tabular"
+                        [class.text-danger]="project.tasks.overdue"
+                      >
+                        @if (project.tasks.overdue) {
+                          {{ project.tasks.overdue }} overdue
+                        }
+                      </span>
+                      <span class="project__target text-tertiary tabular">
+                        {{ project.targetDate | calendarDate }}
+                      </span>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </section>
+        </div>
+
+        <aside class="layout__aside" aria-labelledby="activity-heading">
+          <div class="section-head">
+            <h2 id="activity-heading">Recent activity</h2>
+          </div>
+          @if (data?.activity?.length === 0) {
+            <p class="text-tertiary feed-empty">Changes to tasks will show up here.</p>
+          }
+          <ol class="feed">
+            @for (entry of data?.activity ?? []; track entry.id) {
+              <li class="feed__item">
+                <app-avatar [person]="entry.actor" [size]="20" />
+                <p>
+                  <span class="feed__actor">{{ entry.actor | fullName }}</span>
+                  {{ describe(entry) }}
+                  <a [routerLink]="['/tasks', entry.task.id]" class="feed__task">
+                    <span class="mono">{{ entry.task.project.key }}-{{ entry.task.number }}</span>
+                    {{ entry.task.title }}
+                  </a>
+                  <time
+                    class="feed__time"
+                    [attr.datetime]="entry.createdAt"
+                    [appTooltip]="exact(entry.createdAt)"
+                  >
+                    {{ ago(entry.createdAt) }}
+                  </time>
+                </p>
+              </li>
+            }
+          </ol>
+        </aside>
+      </div>
+    }
+  </div>
+</div>
