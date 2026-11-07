@@ -1,0 +1,132 @@
+@use 'mixins' as *;
+
+:host {
+  display: block;
+  margin-top: var(--space-8);
+}
+
+.heading {
+  margin-bottom: var(--space-3);
+  @include text('heading-sm');
+}
+
+// A thin rail connects history entries; comments sit on it as cards.
+.timeline {
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+  &::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 11.5px;
+    width: 1px;
+    background: var(--color-border);
+  }
+}
+
+.event {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding-left: 7px;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-meta);
+  line-height: var(--line-height-meta);
+}
+.event__dot {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--color-canvas);
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+  transform: translateY(1px);
+  :host-context(app-side-panel) & {
+    border-color: var(--color-surface);
+  }
+}
+.event__actor {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.comment {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+.comment__card {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.comment__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 24px;
+  strong {
+    font-weight: var(--font-weight-medium);
+  }
+  time {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-meta);
+  }
+}
+.comment__delete {
+  margin-left: auto;
+  opacity: 0;
+  .comment:hover &,
+  &:focus-visible {
+    opacity: 1;
+  }
+}
+.comment__body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.composer {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.composer__box {
+  flex: 1;
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  transition: var(--transition-colors);
+  &:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-subtle);
+  }
+  textarea {
+    display: block;
+    width: 100%;
+    min-height: 64px;
+    padding: var(--space-2) var(--space-3);
+    border: 0;
+    background: none;
+    resize: none;
+    field-sizing: content;
+    outline: none;
+    &::placeholder {
+      color: var(--color-text-tertiary);
+    }
+  }
+}
+.composer__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1-5) var(--space-1-5) var(--space-1-5) var(--space-3);
+}

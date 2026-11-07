@@ -1,0 +1,246 @@
+@use 'mixins' as *;
+
+:host {
+  display: grid;
+  min-height: 0;
+}
+:host(.detail--page) {
+  grid-template-columns: minmax(0, 1fr) 300px;
+  height: 100%;
+  @include down('lg') {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+  @include down('md') {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.detail__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+  padding: var(--space-8) var(--space-10) var(--space-12);
+}
+.detail__main > * {
+  flex-shrink: 0;
+}
+// Centres a 760px reading column; padding (not margins) so the in-place editors can still
+// pull their hover background out by a few pixels.
+:host(.detail--page) .detail__main {
+  padding-inline: max(var(--space-10), calc((100% - 760px) / 2));
+}
+:host(.detail--panel) .detail__main {
+  padding: var(--space-5) var(--space-6) var(--space-8);
+}
+@include down('md') {
+  .detail__main {
+    padding: var(--space-5) var(--space-4) var(--space-8);
+  }
+}
+
+.detail__parent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  margin-bottom: var(--space-3);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-meta);
+}
+
+// Title and description are edited in place: inputs without chrome until focused.
+.detail__title,
+.detail__description {
+  display: block;
+  width: calc(100% + 2 * var(--space-2));
+  margin-inline: calc(-1 * var(--space-2));
+  padding: var(--space-1) var(--space-2);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text);
+  resize: none;
+  field-sizing: content;
+  transition: var(--transition-colors);
+  &:hover {
+    background: var(--color-state-hover);
+  }
+  &:focus {
+    outline: none;
+    border-color: var(--color-border);
+    background: var(--color-surface);
+  }
+}
+.detail__title {
+  @include text('display');
+  :host(.detail--panel) & {
+    @include text('title');
+  }
+}
+.detail__description {
+  min-height: 72px;
+  margin-top: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-lg);
+  line-height: var(--line-height-body-lg);
+  &::placeholder {
+    color: var(--color-text-tertiary);
+  }
+}
+
+.detail__section {
+  margin-top: var(--space-8);
+}
+.detail__heading {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  @include text('heading-sm');
+}
+.detail__count {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-regular);
+}
+
+.subtasks {
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.subtask {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2-5);
+  height: var(--row-height);
+  padding: 0 var(--space-3);
+  & + & {
+    border-top: var(--border-subtle);
+  }
+}
+.subtask__toggle {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-left: -3px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  &:hover {
+    background: var(--color-state-hover);
+  }
+}
+.subtask__title {
+  flex: 1;
+  @include truncate;
+  color: var(--color-text);
+}
+.subtask--done .subtask__title {
+  color: var(--color-text-tertiary);
+  text-decoration: line-through;
+}
+.subtask--new {
+  color: var(--color-text-tertiary);
+  input {
+    flex: 1;
+    height: 100%;
+    border: 0;
+    background: none;
+    outline: none;
+    &::placeholder {
+      color: var(--color-text-tertiary);
+    }
+  }
+}
+
+// ---------------------------------------------------------------- Properties
+.detail__rail {
+  overflow-y: auto;
+  padding: var(--space-6) var(--space-5);
+  border-left: var(--border);
+  background: var(--color-surface-subtle);
+  @include down('md') {
+    border-top: var(--border);
+    border-left: 0;
+  }
+}
+
+.props {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  row-gap: 2px;
+  column-gap: var(--space-3);
+  :host(.detail--panel) & {
+    margin-top: var(--space-4);
+    padding: var(--space-3) 0;
+    border-block: var(--border-subtle);
+  }
+}
+dt {
+  @include text('label');
+  color: var(--color-text-tertiary);
+}
+dd {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: var(--control-height);
+  padding-left: var(--space-2);
+}
+dd > app-status-picker,
+dd > app-priority-picker,
+dd > app-assignee-picker {
+  flex: 1;
+  min-width: 0;
+}
+.props__static {
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+}
+.props__link {
+  @include truncate;
+  color: var(--color-text);
+  .mono {
+    color: var(--color-text-tertiary);
+  }
+}
+.props__separator {
+  grid-column: 1 / -1;
+  height: 1px;
+  margin: var(--space-3) 0;
+  background: var(--color-border-subtle);
+}
+
+.input--bare {
+  width: auto;
+  margin-left: calc(-1 * var(--space-2));
+  padding: 0 var(--space-2);
+  border-color: transparent;
+  background: none;
+  box-shadow: none;
+  &:hover {
+    border-color: transparent;
+    background: var(--color-state-hover);
+  }
+}
+.props__due-hint {
+  margin-left: var(--space-1);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-meta);
+}
+.props__due[data-tone='overdue'] .props__due-hint {
+  color: var(--color-danger);
+}
+.props__due[data-tone='today'] .props__due-hint {
+  color: var(--color-warning);
+}
+.props__due {
+  white-space: nowrap;
+  .input--bare {
+    width: 132px;
+  }
+}

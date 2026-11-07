@@ -1,0 +1,155 @@
+@if (resource.error() && !task()) {
+  <app-load-error [error]="resource.error()" (retry)="resource.reload()" />
+} @else if (task(); as task) {
+  <div class="detail__main">
+    @if (task.parent; as parent) {
+      <a class="detail__parent" [routerLink]="['/tasks', parent.id]">
+        <app-icon name="subtasks" [size]="14" />
+        Subtask of <span class="mono">{{ task.project.key }}-{{ parent.number }}</span>
+        {{ parent.title }}
+      </a>
+    }
+
+    <label class="visually-hidden" for="task-title-{{ task.id }}">Title</label>
+    <textarea
+      #titleBox
+      id="task-title-{{ task.id }}"
+      class="detail__title"
+      rows="1"
+      maxlength="191"
+      [value]="task.title"
+      (keydown.enter)="$event.preventDefault(); titleBox.blur()"
+      (blur)="saveTitle(titleBox)"
+    ></textarea>
+
+    @if (variant() === 'panel') {
+      <ng-container *ngTemplateOutlet="properties" />
+    }
+
+    <label class="visually-hidden" for="task-description-{{ task.id }}">Description</label>
+    <textarea
+      #descriptionBox
+      id="task-description-{{ task.id }}"
+      class="detail__description"
+      placeholder="Add a description…"
+      [value]="task.description ?? ''"
+      (blur)="saveDescription(descriptionBox.value)"
+    ></textarea>
+
+    <section class="detail__section" aria-labelledby="subtasks-{{ task.id }}">
+      <h2 class="detail__heading" id="subtasks-{{ task.id }}">
+        Subtasks
+        @if (task.subtasks.length) {
+          <span class="detail__count tabular">{{ subtasksDone() }}/{{ task.subtasks.length }}</span>
+        }
+      </h2>
+      @if (!task.parent) {
+        <ul class="subtasks">
+          @for (subtask of task.subtasks; track subtask.id) {
+            <li class="subtask" [class.subtask--done]="subtask.status === 'Done'">
+              <button
+                type="button"
+                class="subtask__toggle"
+                role="checkbox"
+                [attr.aria-checked]="subtask.status === 'Done'"
+                [attr.aria-label]="'Done: ' + subtask.title"
+                (click)="toggleSubtask(subtask)"
+              >
+                <app-status-icon [status]="subtask.status" decorative />
+              </button>
+              <a class="subtask__title" [routerLink]="['/tasks', subtask.id]">{{
+                subtask.title
+              }}</a>
+              <span class="mono text-tertiary">{{ task.project.key }}-{{ subtask.number }}</span>
+              @if (subtask.assignee; as person) {
+                <app-avatar [person]="person" [size]="18" />
+              }
+            </li>
+          }
+          <li class="subtask subtask--new">
+            <app-icon name="plus" [size]="14" />
+            <input
+              #subtaskBox
+              aria-label="New subtask"
+              placeholder="Add subtask"
+              [value]="newSubtask()"
+              (input)="newSubtask.set(subtaskBox.value)"
+              (keydown.enter)="addSubtask()"
+            />
+          </li>
+        </ul>
+      } @else {
+        <p class="text-tertiary">Subtasks cannot have subtasks of their own.</p>
+      }
+    </section>
+
+    <app-task-timeline [taskId]="task.id" />
+  </div>
+
+  @if (variant() === 'page') {
+    <aside class="detail__rail" aria-label="Properties">
+      <ng-container *ngTemplateOutlet="properties" />
+    </aside>
+  }
+
+  <ng-template #properties>
+    <dl class="props">
+      <dt>Status</dt>
+      <dd><app-status-picker [value]="task.status" (valueChange)="save({ status: $event })" /></dd>
+      <dt>Priority</dt>
+      <dd>
+        <app-priority-picker [value]="task.priority" (valueChange)="save({ priority: $event })" />
+      </dd>
+      <dt>Assignee</dt>
+      <dd>
+        <app-assignee-picker
+          [people]="workspace.members()"
+          [value]="task.assignee?.id ?? null"
+          (valueChange)="save({ assigneeId: $event })"
+        />
+      </dd>
+      <dt><label for="task-due-{{ task.id }}">Due date</label></dt>
+      <dd class="props__due" [attr.data-tone]="due()?.tone">
+        <input
+          #dueBox
+          id="task-due-{{ task.id }}"
+          type="date"
+          class="input input--bare"
+          [value]="task.dueDate?.slice(0, 10) ?? ''"
+          (change)="save({ dueDate: dueBox.value || null })"
+        />
+        @if (due(); as d) {
+          <span class="props__due-hint">{{ d.text }}</span>
+        }
+      </dd>
+      @if (variant() === 'page') {
+        <div class="props__separator" role="presentation"></div>
+        <dt>Project</dt>
+        <dd>
+          <a class="props__link" [routerLink]="['/projects', task.project.id]">
+            <span class="mono">{{ task.project.key }}</span> {{ task.project.name }}
+          </a>
+        </dd>
+        <dt>Reporter</dt>
+        <dd class="props__static">
+          <app-avatar [person]="task.reporter" [size]="18" />
+          {{ task.reporter | fullName }}
+        </dd>
+        <dt>Created</dt>
+        <dd class="props__static">{{ task.createdAt | timestamp }}</dd>
+        <dt>Updated</dt>
+        <dd class="props__static">{{ task.updatedAt | timestamp }}</dd>
+        @if (task.completedAt) {
+          <dt>Completed</dt>
+          <dd class="props__static">{{ task.completedAt | timestamp }}</dd>
+        }
+      }
+    </dl>
+  </ng-template>
+} @else {
+  <div class="detail__main" aria-busy="true">
+    <span class="skeleton" style="width: 60%; height: 22px"></span>
+    <span class="skeleton" style="width: 90%; margin-top: 24px"></span>
+    <span class="skeleton" style="width: 75%; margin-top: 10px"></span>
+  </div>
+}
