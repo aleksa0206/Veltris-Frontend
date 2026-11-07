@@ -4,6 +4,7 @@
 
 Angular client for Veltris, a project management tool for teams: workspaces with members, projects with a short key, task boards with drag and drop, and task details with subtasks, comments and a full change history.
 
+- Live: **https://veltris.stackvale.space**
 - Backend: [Veltris-Backend](https://github.com/aleksa0206/Veltris-Backend)
 
 ## What's inside
